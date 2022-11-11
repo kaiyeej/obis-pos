@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>OBIS POS</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/icon-white.png" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/bootstrap.min.css" rel='stylesheet'>
+        <link href="css/datatables.min.css" rel='stylesheet'>
+        <link href="css/styles.css" rel="stylesheet" />
+        <link href='css/boxicons/css/boxicons.min.css' rel='stylesheet'>
+        <link rel="stylesheet" href="css/NToast.min.css">
+
+        <!-- Insert this line above script imports  -->
+        <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+        <!-- Bootstrap core JS-->
+        <script src="js/jquery.js" crossorigin="anonymous"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/datatables.min.js"></script>
+
+        <!-- Insert this line after script imports -->
+        <script>if (window.module) module = window.module;</script>
+    </head>
+    <body style="background: #18223c;">
+        <div class="d-flex" id="wrapper">
+            <!-- Sidebar-->
+            <div class="bg-dark" id="sidebar-wrapper">
+                <div class="sidebar-heading border-bottom bg-dark" style="color: #fff;text-align: center;"><img src="assets/logo1.png" style="width: 30px;"></div>
+                <div class="list-group list-group-flush" >
+                    <a class="list-group-item list-group-item-action list-group-item-dark p-3" href="#!" onclick="key_sales_summary()"><i class="bx bx-file"></i> Sales Summary / Shift Cashier</a>
+                    <!-- <a class="list-group-item list-group-item-action list-group-item-dark p-3" href="#!"><i class="bx bx-transfer"></i> Shift Cashier</a>
+                    <a class="list-group-item list-group-item-action list-group-item-dark p-3" href="#!" onclick="logout()"><i class="bx bx-exit"></i> Sign out</a> -->
+                    <a class="list-group-item list-group-item-action list-group-item-dark p-3" href="#!" onclick="reload_window()"><i class="bx bx-refresh"></i> Reload Window</a>
+                    <a class="list-group-item list-group-item-action list-group-item-dark p-3" href="#!" onclick="showModalPayment()"> [Ctrl + Enter] Tender</a>
+                </div>
+            </div>
+            <!-- Page content wrapper-->
+            <div id="page-content-wrapper" >
+                <!-- Top navigation-->
+                <!--<nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+                    <div class="container-fluid">
+                        <button class="btn btn-secondary" id="sidebarToggle"><i class="bx bx-list-plus"></i></button>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent" >
+                            <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                                <li class="nav-item active"><a class="nav-link" href="#!">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#!">Link</a></li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item" href="#!">Action</a>
+                                        <a class="dropdown-item" href="#!">Another action</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#!">Something else here</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>-->
+                <!-- Page content-->
+                <div class="container-fluid">
+                    <br />
+                    <div class="row">
+                        <div class="col-lg-7 col-md-7 col-sm-7">
+                            <div class="container" style="background: #131c32; border-radius: 5px;  height: 45rem; max-height: 45rem; overflow: auto; margin-top: 20px;">
+                                <div class="mt-4">
+                                    <br />
+                                    <br />
+                                    <br />
+                                    <input type="hidden" id="sales_num">
+                                    <input type="hidden" id="product_id">
+                                    <input type="hidden" id="action">
+                                    <form action="" method="post" id="frm_add_item" onsubmit="event.preventDefault()">
+                                        <div class="input-group input-group-lg">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" style="padding: 1rem 1rem; background: transparent; color: #fff;"><i class="bx bx-search"></i></span>
+                                            </div>
+                                            <input type="text" id="product_input" class="form-control" style="background: transparent; color: #fff;" placeholder="scan or search item" autocomplete="off" />
+                                        </div>
+                                    </form>
+                                    <br />
+                                </div>
+                                <!-- <input type="text" class="form-control" autofocus> -->
+                                <table class="table table-bordered" style="color: #ff5722;" id="dt_products">
+                                    <thead>
+                                        <tr>
+                                            <th>Item Code</th>
+                                            <th>Item</th>
+                                            <th>Price</th>
+                                            <th>Category</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="font-size: 0.9rem;"></tbody>
+                                </table>
+                                <br/>
+                            </div>
+                        </div>
+                        <div class="col-lg-5 col-md-5 col-sm-5">
+                            <div class="container" style="background: #131c32; border-radius: 5px;  height: 45rem; max-height: 45rem; overflow: auto; margin-top: 20px;">
+                                <h1 class="mt-4" style="color: #fff; text-align: right;">&#x20B1;<span id="totalAmount">0.00</span></h1>
+                                <input type="hidden" id="totalPaymentAmount" />
+
+                                <div id="pos_main_transaction">
+                                    <div class="row" style="color: #fff; font-size: 12px;">
+                                        <div class="col-lg-6 col-md-6 col-sm-6">
+                                            <div><span class="bx bx-user-pin"></span> Cashier: <span id="cashier_name"></span></div>
+                                            <div><span class="bx bx-user"></span> Customer: <span id="customer_name">Walk-in</span><input type="hidden" id="customer_id" value="0" /></div>
+                                        </div>
+                                        <div class="col-lg-6 col-md-6 col-sm-6" style="text-align: right;">
+                                            <div><span id="totalQty">0</span> item(s)</div>
+                                            <div><span class="bx bx-credit-card-front"></span> Payment Type: <span id="sales_type_label">Cash</span><input type="hidden" id="sales_type" value="C" /></div>
+                                        </div>
+                                    </div>
+                                    <div style="height: 35rem; max-height: 35rem; overflow: auto; width: 100%; overflow-x: hidden;">
+                                        <table class="table table-bordered" style="color: #ff5722;" id="dt_details">
+                                            <thead>
+                                                <tr>
+                                                    <th>Qty</th>
+                                                    <th>Item</th>
+                                                    <th>Price</th>
+                                                    <th>Subtotal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody style="font-size: 0.9rem;">
+                                            </tbody>
+                                            <tfoot style="font-size: 0.9rem;">
+                                                <tr>
+                                                    <td colspan="3">
+                                                        Other Payments
+                                                    </td>
+                                                    <td colspan="1">
+                                                        &#x20B1;<span id='other_payment'>0.00</span>
+                                                        <input type="hidden" id="totalOtherPayment" />
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- Modal for Payment -->
+                <div class="modal fade" id="modalPayment" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="paymentModalTitle">Tender</h5>
+                            </div>
+                            <div class="modal-body">
+                                <form action="" method="post" id="frm_payment" onsubmit="event.preventDefault()">
+                                    <div id="carouselPayment" class="carousel slide" data-ride="carousel">
+                                        <div class="carousel-inner">
+                                            <div class="carousel-item active">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Total Amount:</span>
+                                                    </div>
+                                                    <input type="text" id="total_amount" class="form-control" readonly />
+                                                </div>
+                                                <br />
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Cash:</span>
+                                                    </div>
+                                                    <input type="number" step="0.01" id="cash_amount" class="form-control" onkeyup="calculateChange()" />
+                                                </div>
+                                                <br />
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Change:</span>
+                                                    </div>
+                                                    <input type="number" id="change" class="form-control" readonly />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="for_pickup" />
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalPayment()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for edit qty -->
+                <div class="modal fade" id="modalEditQty" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="editQtyModalTitle"></h5>
+                            </div>
+                            <div class="modal-body">
+                                <form action="" method="post" id="frm_editQty" onsubmit="event.preventDefault()">
+                                    <input type="hidden" id="sales_detail_id" />
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Qty:</span>
+                                        </div>
+                                        <input type="number" min="0" id="edit_qty" class="form-control" />
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalEditQty()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="editQty()">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for line discount -->
+                <div class="modal fade" id="modalEditDiscount" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="editDiscountModalTitle"></h5>
+                            </div>
+                            <div class="modal-body">
+                                <form action="" method="post" id="frm_editDiscount" onsubmit="event.preventDefault()">
+                                    <div id="carouselLineDiscount" class="carousel slide" data-ride="carousel">
+                                        <div class="carousel-inner">
+                                            <div class="carousel-item active">
+                                                <table class="table table-bordered" style="color: #ff5722; width: 100%;" id="dt_line_discount_options">
+                                                    <thead>
+                                                        <tr style="background: #131c32 !important;">
+                                                            <th>Discount Type</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody style="font-size: 0.8rem;">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="carousel-item">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Discount:</span>
+                                                    </div>
+                                                    <input type="number" min="0" id="edit_discount" class="form-control" />
+                                                </div>
+                                            </div>
+                                            <div class="carousel-item">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Access Code:</span>
+                                                    </div>
+                                                    <input type="password" id="access_code_line_discount" class="form-control" autocomplete="off" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="sales_detail_id2" />
+                                        <input type="hidden" id="line_discount_type" />
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalLineDiscount()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for manual discounts -->
+                <div class="modal fade" id="modalDiscounts" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title"><span class='bx bx-check'></span> Please Select Discount</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div id="carouselDiscounts" class="carousel slide" data-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <div class="carousel-item active">
+                                            <table class="table table-bordered" style="color: #ff5722; width: 100%;" id="dt_discounts">
+                                                <thead>
+                                                    <tr style="background: #131c32 !important;">
+                                                        <th>Discount/Promo</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody style="font-size: 0.8rem;">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Access Code:</span>
+                                                </div>
+                                                <input type="password" id="access_code_discount" class="form-control" autocomplete="off" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="discount_id" />
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalDiscount()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for confirm action -->
+                <div class="modal fade" id="modalConfirmAction" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title"><span class='bx bx-message-alt-error'></span> Please confirm <span id="confirm_action_content"></span></h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class="input-group" id="access_code_container">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Access Code:</span>
+                                    </div>
+                                    <input type="password" id="access_code" class="form-control" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalConfirm()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for confirm action 2 -->
+                <div class="modal fade" id="modalConfirmAction2" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title"><span class='bx bx-message-alt-error'></span> Please confirm</h5>
+                            </div>
+                            <div class="modal-body">
+                                <h5 id="confirm_action_content2"></h5>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalConfirm()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for save order -->
+                <div class="modal fade" id="modalRecall" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title"><span class='bx bx-bookmark'></span> Saved Orders</h5>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table table-bordered" style="color: #ff5722; width: 100%;" id="dt_pending_sales">
+                                    <thead>
+                                        <tr style="background: #131c32 !important;">
+                                            <th>Sales #</th>
+                                            <th>Customer</th>
+                                            <th>Total</th>
+                                            <th>Date/Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="font-size: 0.8rem;">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalRecall()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for payment option -->
+                <div class="modal fade" id="modalPaymentOption" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title"><span class='bx bx-check'></span> Please Select Payment Option</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div id="carouselOtherPayments" class="carousel slide" data-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <div class="carousel-item active">
+                                            <table class="table table-bordered" style="color: #ff5722; width: 100%;" id="dt_payment_options">
+                                                <thead>
+                                                    <tr style="background: #131c32 !important;">
+                                                        <th>Payment Option</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody style="font-size: 0.8rem;">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Amount:</span>
+                                                </div>
+                                                <input type="number" min="0" step="0.01" id="other_payment_amount" class="form-control" required />
+                                            </div>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Reference #:</span>
+                                                </div>
+                                                <input type="text" id="other_payment_reference" class="form-control" required />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="payment_option_id" />
+                                    <input type="hidden" id="payment_option" />
+                                    <input type="hidden" id="payment_num" />
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalPaymentOptions()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for customers -->
+                <div class="modal fade" id="modalCustomers" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title"><span class='bx bx-user-check'></span> Select Customer</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div id="carouselCustomers" class="carousel slide" data-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <div class="carousel-item active">
+                                            <table class="table table-bordered" style="color: #ff5722; width: 100%;" id="dt_customers">
+                                                <thead>
+                                                    <tr style="background: #131c32 !important;">
+                                                        <th>Customer</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody style="font-size: 0.8rem;">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Access Code:</span>
+                                                </div>
+                                                <input type="password" id="c_access_code" class="form-control" autocomplete="off" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="c_customer_id" />
+                                <input type="hidden" id="c_customer_name" />
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalCustomers()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for add customers -->
+                <div class="modal fade" id="modalAddCustomer" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title"><span class='bx bx-plus-circle'></span> Add New Customer</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div id="carouselAddCustomer" class="carousel slide" data-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <div class="carousel-item active">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Customer Name:</span>
+                                                </div>
+                                                <input type="text" id="ac_customer_name" class="form-control" autocomplete="off" required />
+                                            </div>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Customer Address:</span>
+                                                </div>
+                                                <input type="text" id="ac_customer_address" class="form-control" autocomplete="off" required />
+                                            </div>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Customer Contact #:</span>
+                                                </div>
+                                                <input type="text" id="ac_customer_contact_number" class="form-control" autocomplete="off" required />
+                                            </div>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Access Code:</span>
+                                                </div>
+                                                <input type="password" id="ac_access_code" class="form-control" autocomplete="off" required />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalAddCustomer()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for releasing order -->
+                <div class="modal fade" id="modalWithdrawal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title"><span class='bx bx-bookmark'></span> For Pickup Orders</h5>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table table-bordered" style="color: #ff5722; width: 100%;" id="dt_stock_withdrawal">
+                                    <thead>
+                                        <tr style="background: #131c32 !important;">
+                                            <th>Sales #</th>
+                                            <th>Customer</th>
+                                            <th>Total</th>
+                                            <th>Date/Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="font-size: 0.8rem;">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalStockWithdrawal()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for releasing items -->
+                <div class="modal fade" id="modalItemWithrawal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title"><span class='bx bx-check-double'></span> For Pickup Items</h5>
+                            </div>
+                            <div class="modal-body">
+                                <form action="" method="POST" id="frm_release_stocks" onsubmit="event.preventDefault()">
+                                    <table class="table table-bordered" style="color: #ff5722; width: 100%;" id="dt_item_withdrawal">
+                                        <thead>
+                                            <tr style="background: #131c32 !important;">
+                                                <th>Items</th>
+                                                <th>Qty Sold</th>
+                                                <th>Remaining Qty</th>
+                                                <th>Releasing Qty</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="font-size: 0.8rem;">
+                                        </tbody>
+                                    </table>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalItemWithdrawal()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="release_stocks()">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for summary of sales -->
+                <div class="modal fade" id="modalSalesSummary" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <div class="row">
+                                <h5 class="modal-title"><span class='bx bx-check-double'></span> Summary of Sales</h5>
+                                <div><span class='bx bx-check'></span> Total Sales: <span id="sales_summary_total_sales"></span></div>
+                                <div><span class='bx bx-check'></span> Total number of items: <span id="sales_summary_total_qty"></span></div>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+                                <div id="carouselSalesSummary" class="carousel slide" data-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <div class="carousel-item active">
+                                            <table class="table table-bordered" style="color: #ff5722; width: 100%;" id="dt_sales_summary">
+                                                <thead>
+                                                    <tr style="background: #131c32 !important;">
+                                                        <th>Item</th>
+                                                        <th>Qty</th>
+                                                        <th>Price</th>
+                                                        <th>Subtotal</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody style="font-size: 0.8rem;">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Starting Balance:</span>
+                                                </div>
+                                                <input type="number" min="0" step="0.01" id="ss_starting_balance" class="form-control" readonly />
+                                            </div>
+                                            <br />
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Total Sales Amount:</span>
+                                                </div>
+                                                <input type="number" min="0" step="0.01" id="ss_total_sales_amount" class="form-control" readonly />
+                                            </div>
+                                            <br />
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Total Amount Collected:</span>
+                                                </div>
+                                                <input type="number" min="0" step="0.01" id="ss_total_amount_collected" class="form-control" required onkeyup="calculate_summary_of_sales_balance()" />
+                                            </div>
+                                            <br />
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Deficit (-):</span>
+                                                </div>
+                                                <input type="number" min="0" step="0.01" id="ss_balance" class="form-control" readonly />
+                                            </div>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Access Code:</span>
+                                                </div>
+                                                <input type="password" id="ss_access_code" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModalSalesSummary()">Close (Esc)</button>
+                                    <button type="button" class="btn btn-primary btn-sm">Confirm Review (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade bd-example-modal-lg" id="modalQueuing" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog  modal-lg" style="margin-top: 50px;" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="modalLabel"><span class='fa fa-print'></span> Print</h4>
+                            </div>
+                            <div class="modal-body" style="padding: 15px;">
+                                <div class="col-12" id="print_queuing">
+                                    <center style="font-size: 12px;">
+                                    <strong>BeanBrewing Café </strong><br>
+                                    <span class="qr_reference_number_span"></span><br>
+                                    <span class="qr_sales_date_span"></span><br><br><br>
+
+                                    <h5>Your token number is</h5>
+                                    <strong style="font-size: 100px;"><span class="qr_sales_q_num"></span></strong>
+                                </center>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-sm" data-bs-dismiss="modal">
+                                    <i class="bx bx-x d-block d-sm-none"></i>
+                                    <span class="d-none d-sm-block">Close</span>
+                                </button>
+                                <button type="button" onclick="print_queuing()" class="btn btn-primary ml-1 btn-sm">
+                                    <i class="bx bx-check d-block d-sm-none"></i>
+                                    <span class="d-none d-sm-block">Print (Enter)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for starting balance -->
+                <div class="modal fade" id="modalStartingBalance" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title"><span class='bx bx-edit'></span> Set Starting Cash for Cashier</h5>
+                            </div>
+                            <div class="modal-body">
+                                <form action="" method="post" id="frm_starting_balance" onsubmit="event.preventDefault()">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" style="padding: 0.7rem 0.7rem;">Starting Balance:</span>
+                                        </div>
+                                        <input type="number" min="0" id="starting_balance" class="form-control" />
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="setStartingBalance()">Proceed (Enter)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for hotkeys -->
+                <div class="modal fade" id="modalHotkeys" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document" data-backdrop="false" data-keyboard="false">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title"><span class='bx bx-bookmark'></span> Hot keys</h5>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table table-bordered" style="color: #ff5722; width: 100%;">
+                                    <thead>
+                                        <tr style="background: #131c32 !important;">
+                                            <th>Keys</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="font-size: 0.8rem;background: #20366c; color: #fff;">
+                                        <tr>
+                                            <td>Add New Customer [Ctrl + A]</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Change Customer Name [Ctrl + N]</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Remove Payment [Ctrl + D]</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Release Order [Ctrl + R]</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Reprint [Ctrl + P]</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Set as Charge payment [Ctrl + H]</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Set as Cash payment [Ctrl + C]</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" onclick="closeModalHotkeys()">Close (Esc)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--
+                    f2 - clear
+                    f3 - delete
+                    f4 - qty
+                    f5 - price
+                    f6 - price look up
+                    f7 - line discount
+                    f8 - discounts
+                    f9 - tender
+                    f10 - finish
+                    alt e - raffle
+                    alt d - description
+                    alt c - customer name
+                    alt b - bonus card
+                    alt m - member credit
+                    alt r - reprint
+                    alt v - void
+                    alt s - sales category
+                    alt z - read
+                    alt a - eco bag discount
+                    alt q - remove eco bag discount
+
+                    ---
+                    add bag
+                    
+                -->
+                <div class="footer">
+                    <div class="row" style="text-align: center; font-size: 10px;">
+                        <div class="col-lg-2 col-md-2 col-sm-2" style="padding: 0px;"><button class="btn btn-secondary btn-block" onclick="key_edit()">[F2]<br />Edit Qty </button></div>
+                        <div class="col-lg-2 col-md-2 col-sm-2" style="padding: 0px;"><button class="btn btn-secondary btn-block" onclick="key_remove()">[F3]<br />Delete Item </button></div>
+                        <div class="col-lg-2 col-md-2 col-sm-2" style="padding: 0px;"><button class="btn btn-secondary btn-block" onclick="key_cancel_order()">[F4]<br />Cancel Order </button></div>
+                        <div class="col-lg-2 col-md-2 col-sm-2" style="padding: 0px;"><button class="btn btn-secondary btn-block" onclick="reload_items()">[F5]<br />Reload Items </button></div>
+                        <div class="col-lg-2 col-md-2 col-sm-2" style="padding: 0px;"><button class="btn btn-secondary btn-block" onclick="key_save_order()">[F9]<br />Save Order </button></div>
+                        <div class="col-lg-2 col-md-2 col-sm-2" style="padding: 0px;"><button class="btn btn-secondary btn-block" onclick="key_recall()">[F10]<br />Recall Order </button></div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+        <!-- Insert this line above script imports  -->
+        <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+        <script src="js/keycodes.js"></script>
+        <script src="js/keys_functions.js"></script>
+        <script src="js/NToast.min.js"></script>
+
+        <!-- Insert this line after script imports -->
+        <script>if (window.module) module = window.module;</script>
+    </body>
+</html>
+
+
+<script type="text/javascript">
+
+    var baseUrl = "http://localhost/OBIS/controllers/sql.php?c=";
+    var user_id = window.localStorage.getItem("pos_user_id")*1;
+    var user_fullname = window.localStorage.getItem("pos_user_fullname");
+
+    $(document).ready(function(){
+
+        if(user_id <= 0){
+            window.location = "login.html";
+        }
+        
+
+        // check for starting balance
+        setStartingBalance();
+
+        $("#product_input").focus();
+
+        generateSalesNum();
+        fetchProducts();
+        getDetails();
+
+        $("#cashier_name").html(user_fullname);
+
+        $('#carouselOtherPayments').carousel({
+            interval: false
+        });
+
+        $('#carouselLineDiscount').carousel({
+            interval: false
+        });
+
+        $('#carouselDiscounts').carousel({
+            interval: false
+        });
+
+        $('#carouselPayment').carousel({
+            interval: false
+        });
+
+        $('#carouselSalesSummary').carousel({
+            interval: false
+        });
+
+        $('#carouselCustomers').carousel({
+            interval: false
+        });
+
+        $('#carouselAddCustomer').carousel({
+            interval: false
+        });
+
+        // set focus on modal payment
+        $("#modalPayment").on('shown.bs.modal', function(){
+            $(this).find('#cash_amount').focus();
+        });
+
+        // set focus on modal edit qty
+        $("#modalEditQty").on('shown.bs.modal', function(){
+            $(this).find('#edit_qty').focus();
+        });
+
+        // set focus on modal edit qty
+        $("#modalEditDiscount").on('shown.bs.modal', function(){
+            var table_line_discount = $('#dt_line_discount_options').DataTable();
+            $(table_line_discount.row().node()).addClass('selected');
+            table_line_discount.cell(':eq(0)').focus();
+        });
+
+        // set focus on modal discounts
+        $("#modalDiscounts").on('shown.bs.modal', function(){
+            /*var table_discounts = $('#dt_discounts').DataTable();
+            $(table_discounts.row().node()).addClass('selected');
+            table_discounts.cell(':eq(0)').focus();*/
+        });
+
+        // set focus on modal payment option
+        $("#modalPaymentOption").on('shown.bs.modal', function(){
+            /*var table_payment_option = $('#dt_payment_options').DataTable();
+            $(table_payment_option.row().node()).addClass('selected');
+            table_payment_option.cell(':eq(0)').focus();*/
+        });
+
+        // set focus for recall
+        $("#modalRecall").on('shown.bs.modal', function(){
+            /*var table_pending_sales = $('#dt_pending_sales').DataTable();
+            $(table_pending_sales.row().node()).addClass('selected');
+            table_pending_sales.cell(':eq(0)').focus();*/
+        });
+
+        // set focus for customers
+        $("#modalCustomers").on('shown.bs.modal', function(){
+            /*var table_customers = $('#dt_customers').DataTable();
+            $(table_customers.row().node()).addClass('selected');
+            table_customers.cell(':eq(0)').focus();*/
+        });
+
+        // set focus for withdrawal
+        $("#modalWithdrawal").on('shown.bs.modal', function(){
+            var table_stock_withdrawal = $('#dt_stock_withdrawal').DataTable();
+            $(table_stock_withdrawal.row().node()).addClass('selected');
+            table_stock_withdrawal.cell(':eq(0)').focus();
+        });
+
+        $("#modalConfirmAction").on('shown.bs.modal', function(){
+            $(this).find('#access_code').focus();
+        });
+
+        $("#modalStartingBalance").on('shown.bs.modal', function(){
+            $(this).find('#starting_balance').focus();
+        });
+
+        $("#modalAddCustomer").on('shown.bs.modal', function(){
+            $(this).find('#ac_customer_name').focus();
+        });
+        
+    });
+
+    function logout(){
+        /*var confirmLogout = confirm("You are about to logout. Please confirm.");
+        if(confirmLogout == true){
+            window.localStorage.clear();
+            window.location = "login.html";
+        }*/
+
+        window.localStorage.clear();
+        window.location = "login.html";
+    }
+
+    function reload_window(){
+        window.location.reload();
+    }
+
+    function showModalConfirmAction(action, content){
+
+        $("#confirm_action_content").html(content);
+
+        $("#action").val(action);
+        $("#modalConfirmAction").modal({ backdrop : false, keyboard: false });
+        $("#modalConfirmAction").modal('show');
+    }
+
+    function showModalConfirmAction2(action, content){
+        $("#confirm_action_content2").html(content);
+
+        $("#action").val(action);
+        $("#modalConfirmAction2").modal({ backdrop : false, keyboard: false });
+        $("#modalConfirmAction2").modal('show');
+    }
+    
+    function closeModalConfirm(){
+        $("#modalConfirmAction").modal('hide');
+        $("#modalConfirmAction2").modal('hide');
+        var table_products = $('#dt_products').DataTable();
+        var table_details = $('#dt_details').DataTable();
+        table_products.cell.blur();
+        table_details.cell.blur();
+        resetFields();
+        $("#product_input").focus();
+    }
+
+    function showModalPayment(){
+        
+        var totalAmount = $("#totalPaymentAmount").val()*1;
+        var totalOtherPayment = $("#totalOtherPayment").val()*1;
+        var totalQty = $("#totalQty").html()*1;
+
+        $('#carouselPayment').carousel(0);
+
+        if(totalAmount > 0){
+            $("#action").val("p");
+            var table_products = $('#dt_products').DataTable();
+            var table_details = $('#dt_details').DataTable();
+            table_products.cell.blur();
+            table_details.cell.blur();
+
+            $("#total_amount").val(totalAmount.toFixed(2));
+            $("#modalPayment").modal({ backdrop : false, keyboard: false });
+            $("#modalPayment").modal('show');
+        }
+    }
+
+    function closeModalHotkeys(){
+        $("#modalHotkeys").modal('hide');
+        var table_products = $('#dt_products').DataTable();
+        var table_details = $('#dt_details').DataTable();
+        table_products.cell.blur();
+        table_details.cell.blur();
+        resetFields();
+        $("#product_input").focus();
+    }
+
+    function closeModalPayment(reset_sales_num = false){
+        $("#modalPayment").modal('hide');
+        var table_products = $('#dt_products').DataTable();
+        table_products.cell.blur();
+        resetFields();
+        $("#product_input").focus();
+
+        if(reset_sales_num == true){
+            $("#product_id").val("");
+            $("#sales_type").val("C");
+            $("#sales_type_label").html("Cash");
+            $("#customer_id").val(0);
+            $("#customer_name").html("Walk-in");
+            generateSalesNum();
+        }
+    }
+
+    function closeModalEditQty(){
+        $("#modalEditQty").modal('hide');
+        var table_details = $('#dt_details').DataTable();
+        table_details.cell.blur();
+        resetFields();
+        $("#product_input").focus();
+    }
+
+    function closeModalLineDiscount(){
+        $("#modalEditDiscount").modal('hide');
+        var table_details = $('#dt_details').DataTable();
+        table_details.cell.blur();
+        resetFields();
+        $("#product_input").focus();
+    }
+
+    function closeModalDiscount(){
+        $("#modalDiscounts").modal('hide');
+        var table_discounts = $('#dt_discounts').DataTable();
+        table_discounts.cell.blur();
+        resetFields();
+        $("#product_input").focus();
+    }
+
+    function closeModalRecall(){
+        $("#modalRecall").modal('hide');
+        var table_pending_sales = $('#dt_pending_sales').DataTable();
+        table_pending_sales.cell.blur();
+        resetFields();
+        $("#product_input").focus();
+    }
+
+    
+
+    function closeModalPaymentOptions(){
+        $("#modalPaymentOption").modal('hide');
+        var table_payment_option = $('#dt_payment_options').DataTable();
+        table_payment_option.cell.blur();
+
+        $("#payment_option_id").val("");
+        $("#other_payment_amount").val("");
+        $("#other_payment_reference").val("");
+
+        resetFields();
+        $("#product_input").focus();
+    }
+
+    function closeModalCustomers(){
+        $("#modalCustomers").modal('hide');
+        var table_customers = $('#dt_customers').DataTable();
+        table_customers.cell.blur();
+        resetFields();
+        $("#product_input").focus();
+    }
+
+    function closeModalAddCustomer(){
+        $("#modalAddCustomer").modal('hide');
+        resetFields();
+        $("#product_input").focus();
+    }
+
+    function closeModalStockWithdrawal(){
+        $("#modalWithdrawal").modal('hide');
+        var table_stock_withdrawal = $('#dt_stock_withdrawal').DataTable();
+        table_stock_withdrawal.cell.blur();
+        resetFields();
+        $("#product_input").focus();
+    }
+
+    function closeModalItemWithdrawal(){
+        $("#modalItemWithrawal").modal('hide');
+        //var table_stock_withdrawal = $('#dt_stock_withdrawal').DataTable();
+        //table_stock_withdrawal.cell.blur();
+        resetFields();
+        generateSalesNum();
+        $("#product_input").focus();
+    }
+
+    function closeModalSalesSummary(){
+        $("#modalSalesSummary").modal('hide');
+        resetFields();
+        $("#product_input").focus();
+    }
+
+    function resetFields(){
+        $("#total_amount").val("");
+        $("#cash_amount").val("");
+        $("#change").val("");
+        $("#action").val("");
+        $("#edit_qty").val("");
+        $("#edit_discount").val("");
+        $("#access_code_line_discount").val("");
+        $("#access_code_discount").val("");
+        $("#access_code").val("");
+        $("#for_pickup").val("");
+        $("#c_access_code").val("");
+        $("#c_customer_id").val("");
+        $("#ac_customer_name").val("");
+        $("#ac_customer_address").val("");
+        $("#ac_customer_contact_number").val("");
+        $("#ac_access_code").val("");
+        /*$("#sales_type").val("C");
+        $("#sales_type_label").html("Cash");
+        $("#customer_id").val(0);
+        $("#customer_name").html("Walk-in");*/
+    }
+
+    function calculateChange(){
+        var total_amount = $("#total_amount").val();
+        var cash_amount = $("#cash_amount").val();
+        var change = cash_amount - total_amount;
+        if(change < 0){
+            $("#change").css({"color": "red"});
+        }else{
+            $("#change").css({"color": "green"});
+        }
+        $("#change").val(change.toFixed(2));
+    }
+
+    function qty_checker(id){
+        var releasing_qty = $("#rel_qty"+id).val()*1;
+        var remaining_qty = $("#rem_qty"+id).val()*1;
+        if(releasing_qty > remaining_qty){
+            $("#rel_qty"+id).val(remaining_qty);
+        }
+    }
+
+    function calculate_summary_of_sales_balance(){
+        var ss_starting_balance = $("#ss_starting_balance").val()*1;
+        var ss_total_sales_amount= $("#ss_total_sales_amount").val()*1;
+        var ss_total_amount_collected = $("#ss_total_amount_collected").val()*1;
+        var balance = ss_starting_balance + ss_total_sales_amount - ss_total_amount_collected;
+        if(balance <= 0){
+            $("#ss_balance").css({"color": "green"});
+        }else{
+            $("#ss_balance").css({"color": "red"});
+        }
+        $("#ss_balance").val(balance.toFixed(2)*-1);
+    }
+
+</script>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>OBIS POS</title>
+  <link rel="icon" type="image/x-icon" href="assets/icon-white.png" />
+  <link rel="stylesheet" href="login/assets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="login/assets/css/login.css">
+</head>
+<body>
+  <main class="d-flex align-items-center min-vh-100 py-3 py-md-0">
+    <div class="container">
+      <div class="card login-card">
+        <div class="row no-gutters">
+          <div class="col-md-5">
+            <img src="assets/logo.png" alt="login" style="width: 460px;padding-top: 150px;padding-left: 30px;" >
+          </div>
+          <div class="col-md-7">
+            <div class="card-body">
+              <div class="brand-wrapper" style="color: #b06918;">
+                <h3><strong>Point Of Sale</strong></h3>
+              </div>
+              <p><h6 style="color: #b06918;">Please provide your credentials</h6></p>
+              <form action="" method="post" id="frm_login">
+                  <div class="form-group">
+                    <label for="username" class="sr-only">Username</label>
+                    <input type="text" name="username" id="username" class="form-control" placeholder="Username" autofocus required autocomplete="off">
+                  </div>
+                  <div class="form-group mb-4">
+                    <label for="password" class="sr-only">Password</label>
+                    <input type="password" name="password" id="password" class="form-control" placeholder="***********" required>
+                  </div>
+                  <input name="login" id="login" class="btn btn-block login-btn mb-4" type="submit" value="Login">
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <!-- Insert this line above script imports  -->
+  <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+  <script src="js/jquery.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+
+  <!-- Insert this line after script imports -->
+  <script>if (window.module) module = window.module;</script>
+
+</body>
+</html>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    var user_id = window.localStorage.getItem("pos_user_id") * 1;
+    if(user_id > 0){
+      window.location = "./index.html";
+    }
+  });
+
+  var baseUrl = "http://localhost/OBIS/controllers/sql.php?c=";
+
+  $("#frm_login").submit(function(e){
+    e.preventDefault();
+
+    var ClassName = "Users";
+    var username = $("#username").val();
+    var password = $("#password").val();
+
+    $.ajax({
+      url: baseUrl + ClassName + "&q=loginCashier",
+      type:"POST",
+      data:{
+        input:{
+          username:username,
+          password:password
+        }
+      },
+      success:function(data){
+        var json = JSON.parse(data);
+        if(json.data.login == "Yes"){
+          //alert("Success");
+          window.localStorage.setItem("pos_user_id", json.data.user_id);
+          window.localStorage.setItem("pos_user_fullname", json.data.user_fullname);
+          
+          window.location = "./index.html";
+        }else{
+          console.log("Invalid user account. Please try again.");
+          alert("Invalid user account. Please try again.");
+        }
+      }
+    });
+
+  });
+
+
+</script>
